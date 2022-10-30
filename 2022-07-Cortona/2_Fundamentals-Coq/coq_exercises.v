@@ -26,14 +26,14 @@ Definition andbool (b : bool) : bool -> bool :=
 
 (** Exercise: define boolean or: *)
 
-(* Definition orbool (b : bool) : bool -> bool := ... *)
+Definition orbool (b : bool) : bool -> bool :=
+  ifbool (bool -> bool) (const bool bool true) (idfun bool) b.
 
-(* This should satisfy:
+(* This should satisfy: *)
 Eval compute in orbool true true.     (* true *)
 Eval compute in orbool true false.    (* true *)
 Eval compute in orbool false true.    (* true *)
 Eval compute in orbool false false.   (* false *)
-*)
 
 
 (** * Natural numbers *)
@@ -46,43 +46,40 @@ Definition even : nat -> bool := nat_rec bool true (fun _ b => negbool b).
 
 (** Exercise: define a function odd that tests if a number is odd *)
 
-(* Definition odd : nat -> bool := ... *)
+Definition odd : nat -> bool := nat_rec bool false (fun _ b => negbool b).
 
-(* This should satisfy
 Eval compute in odd 24.    (* false *)
 Eval compute in odd 19.   (* true *)
 
-Beware of big numbers: [UniMath.Foundations.Preamble] only defines notation up to 24.
-*)
+(* Beware of big numbers: [UniMath.Foundations.Preamble] only defines notation up to 24. *)
 
 (** Exercise: define a notation "myif b then x else y" for "ifbool _ x y b"
 and rewrite negbool and andbool using this notation. *)
 
-(* Notation "..." := (...) (at level 1). *)
+Notation "b ? x :' y" := (ifbool _ x y b) (at level 1).
 
 (** Note that we cannot introduce the notation "if b then x else y" as
 this is already used. *)
 
-(* Definition negbool' (b : bool) : bool := ... *)
+Definition negbool' (b : bool) : bool := b ? false :' true.
 
 (* Check that negbool' uses ifbool by disabling printing of notations *)
 (* Command palette Display All Basic Low-level Contents. *)
 Print negbool'.
 (* Command palette Display All Basic Low-level Contents. *)
 
-(* This should satisfy:
+(* This should satisfy: *)
 Eval compute in negbool' true.   (* false *)
 Eval compute in negbool' false.  (* true *)
-*)
 
-(* Definition andbool' (b1 b2 : bool) : bool := ... *)
+Definition andbool' (b1 b2 : bool) : bool := b1 ? true :' (b2 ? true :' false).
 
-(* This should satisfy:
+(* This should satisfy: *)
+
 Eval compute in andbool true true.    (* true *)
 Eval compute in andbool true false.   (* false *)
 Eval compute in andbool false true.   (* false *)
 Eval compute in andbool false false.  (* false *)
-*)
 
 
 Definition add (m : nat) : nat -> nat := nat_rec nat m (fun _ y => S y).
@@ -91,17 +88,16 @@ Definition iter (A : UU) (a : A) (f : A → A) : nat → A :=
   nat_rec A a (λ _ y, f y).
 
 (* Type space and then \hat to enter the symbol  ̂. *)
-Notation "f ̂ n" := (λ x, iter _ x f n) (at level 10).
+Notation "f ̂^ n" := (λ x, iter _ x f n) (at level 10).
 
-Definition sub (m n : nat) : nat := pred ̂ n m.
+Definition sub (m n : nat) : nat := pred ̂^ n m.
 
 (** Exercise: define addition using iter and S *)
 
-(* Definition add' (m : nat) : nat → nat := ... *)
+Definition add' (m : nat) : nat → nat :=  succ ̂^ m.
 
-(* This should satisfy:
+(* This should satisfy: *)
 Eval compute in add' 4 9.   (* 13 *)
-*)
 
 Definition is_zero : nat -> bool := nat_rec bool true (fun _ _ => false).
 
@@ -112,45 +108,41 @@ Notation "m == n" := (eqnat m n) (at level 50).
 
 (** Exercises: define <, >, ≤, ≥  *)
 
-(* Definition ltnat (m n : nat) : bool := ... *)
+Definition ltnat (m n : nat) : bool := negbool (is_zero (sub n m)).
 
-(* Notation "x < y" := (ltnat x y). *)
+Notation "x < y" := (ltnat x y).
 
-(* This should satisfy:
+(* This should satisfy: *)
 Eval compute in (2 < 3). (* true *)
 Eval compute in (3 < 3). (* false *)
 Eval compute in (4 < 3). (* false *)
-*)
 
-(* Definition gtnat (m n : nat) : bool := ... *)
+Definition gtnat (m n : nat) : bool := negbool (is_zero (sub m n)). 
 
-(* Notation "x > y" := (gtnat x y). *)
+Notation "x > y" := (gtnat x y).
 
-(* This should satisfy:
+(* This should satisfy: *)
 Eval compute in (2 > 3). (* false *)
 Eval compute in (3 > 3). (* false *)
 Eval compute in (4 > 3). (* true *)
-*)
 
-(* Definition leqnat (m n : nat) : bool := ... *)
+Definition leqnat (m n : nat) : bool := is_zero (sub m n). 
 
-(* Notation "x ≤ y" := (leqnat x y) (at level 10). *)
+Notation "x ≤ y" := (leqnat x y) (at level 10).
 
-(* This should satisfy:
+(* This should satisfy: *)
 Eval compute in (2 ≤ 3). (* true *)
 Eval compute in (3 ≤ 3). (* true *)
 Eval compute in (4 ≤ 3). (* false *)
-*)
 
-(* Definition geqnat (m n : nat) : bool := ... *)
+Definition geqnat (m n : nat) : bool := is_zero (sub n m).
 
-(* Notation "x ≥ y" := (geqnat x y) (at level 10). *)
+Notation "x ≥ y" := (geqnat x y) (at level 10).
 
-(* This should satisfy:
+(* This should satisfy: *)
 Eval compute in (2 ≥ 3). (* false *)
 Eval compute in (3 ≥ 3). (* true *)
 Eval compute in (4 ≥ 3). (* true *)
-*)
 
 
 (** * Coproduct and integers *)
